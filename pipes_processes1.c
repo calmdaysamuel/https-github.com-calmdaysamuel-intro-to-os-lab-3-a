@@ -6,6 +6,7 @@
 #include<string.h> 
 #include<sys/wait.h> 
   
+
 int main() 
 { 
     // We use two pipes 
@@ -16,6 +17,7 @@ int main()
     int fd2[2];  // Used to store two ends of second pipe 
   
     char fixed_str[] = "howard.edu"; 
+    char go_bison[] = "gobison.org";
     char input_str[100]; 
     pid_t p; 
   
@@ -45,7 +47,7 @@ int main()
     { 
   
         close(fd1[0]);  // Close reading end of pipes 
-        close(fd2[0]);
+        //close(fd2[0]);
   
         // Write input string and close writing end of first 
         // pipe. 
@@ -55,15 +57,30 @@ int main()
         // Wait for child to send a string 
         wait(NULL); 
   
-        close(fd2[1]); // Close writing end of pipes 
+        //close(fd2[1]); // Close writing end of pipes 
         close(fd1[1]); 
+      
+        close(fd2[1]);
+        char concat_str[100]; 
+        read(fd2[0], concat_str, 100); 
+      
+        int k = strlen(concat_str); 
+        int i; 
+        for (i=0; i<strlen(go_bison); i++) 
+            concat_str[k++] = go_bison[i]; 
+  
+        concat_str[k] = '\0';   // string ends with '\0' 
+  
+        printf("Concatenated string %s\n", concat_str);
+      
+      close(fd2[0]);
     } 
   
     // child process 
     else
     { 
         close(fd1[1]);  // Close writing end of first pipes 
-        close(fd2[1]); 
+        //close(fd2[1]); 
       
         // Read a string using first pipe 
         char concat_str[100]; 
@@ -79,10 +96,18 @@ int main()
   
         printf("Concatenated string %s\n", concat_str);
         // Close both reading ends 
+      
+        
+      
         close(fd1[0]); 
-        close(fd2[0]); 
-
-  
+        //close(fd2[0]); 
+        
+      close(fd2[0]);
+        printf("Enter a string to concatenate:");
+        scanf("%s", input_str); 
+        write(fd2[1], input_str, strlen(input_str)+1); 
+        
+      close(fd2[1]);
         exit(0); 
     } 
 } 
